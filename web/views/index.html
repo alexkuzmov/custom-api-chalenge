@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <meta content="width=device-width, initial-scale=1" name="viewport" />
+        
+        <link rel="stylesheet" type="text/css" href="/css/normalize.css" />
+		<link rel="stylesheet" type="text/css" href="/css/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="/css/bootstrap-responsive.min.css" />
+        
+		<link rel="stylesheet" type="text/css" href="/css/main.css" />
+		<link rel="stylesheet" type="text/css" href="/css/responsive.css" />
+	</head>
+
+	<body>
+        <div class="row-fluid wrapper">
+            {if (isset($smarty.session.user))}
+            
+            <div class="span12">
+                <a class="right" href="/auth/logout">Logout</a>
+            </div>
+            
+            <h2>Most frequent words in feed</h2>
+            
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Word</th>
+                        <th>Occurrence</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach $foundWords AS $word => $wordOccurrence}
+                    <tr>
+                        <td>{$word}</td>
+                        <td>{$wordOccurrence}</td>
+                    </tr>
+                    {/foreach}
+                </tbody>
+            </table>
+            
+            <h2>Articles from the feed</h2>
+            
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Article Title</th>
+                        <th>Summary</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach $articles AS $articleKey => $article}
+                        <tr>
+                            <td>{$article->title}</td>
+                            <td>{$article->summary}</td>
+                        </tr>
+                    {/foreach}
+                </tbody>
+            </table>
+            
+            {else}
+                <div class="span12">
+                    <div class="row-fluid">
+                        <div class="span6">
+                            <div class="auth-container">
+                                <form id="login-form" class="form-vertical" method="POST" action="/auth/login">
+                                    <fieldset>
+                                        <legend>Login</legend>
+                                        
+                                        <span class="badge badge-error form-error" {if (!isset($loginError) || strlen($loginError) <= 0)}style="display: none;"{/if}>{if (isset($loginError) && strlen($loginError) > 0)}{$loginError}asd{/if}</span>
+                                        
+                                        <div class="control-group">
+                                            <div class="controls">
+                                                <input type="text" class="input-xlarge" name="email" value="{if (isset($smarty.post.email))}{$smarty.post.email}{/if}" placeholder="Email" />
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="control-group">
+                                            <div class="controls">
+                                                <input type="password" class="input-xlarge" name="password" placeholder="Password" />
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    
+                                    <button type="submit" class="btn">Login</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <div class="span6">
+                            <div class="auth-container">
+                                
+                                
+                                <form id="register-form" class="form-vertical" method="POST" action="/auth/register" data-validate-url="/api/v1/auth/validate" >
+                                    <fieldset>
+                                        <legend>Register</legend>
+                                        
+                                        <span id="register-error" class="badge badge-error form-error" {if (!isset($registerError) || strlen($registerError) <= 0)}style="display: none;"{/if}>{if (isset($registerError) && strlen($registerError) > 0)}{$registerError}{/if}</span>
+                                        
+                                        <div class="control-group">
+                                            <div class="controls">
+                                                <input id="register-email" type="text" class="input-xlarge" name="email" placeholder="Email" />
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="control-group">
+                                            <div class="controls">
+                                                <input id="register-password" type="password" class="input-xlarge" name="password" placeholder="Password" />
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                    
+                                    <button id="register-form-submit" type="button" class="btn">Register</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {/if}
+        </div>
+        
+        <script src="/js/jquery-3.4.1.min.js"></script>
+        
+        <script>
+            $('#register-form-submit').on('click', function(e){
+                $('#register-error').css('display', 'none');
+                
+                $.ajax({
+                    url: $('#register-form').data('validate-url'),
+                    method: 'POST',
+                    data: {
+                        email: $('#register-email').val(),
+                        password: $('#register-password').val()
+                    },
+                    async: true,
+                    success: function (response) {
+                        
+                        // If the check has passed we can submit the form
+                        $('#register-form').submit();
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        $('#register-error').css('display', 'inline-block').html(jqXHR.statusText);
+                    }
+                });
+            });
+        </script>
+	</body>
+</html>
